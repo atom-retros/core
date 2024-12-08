@@ -5,6 +5,7 @@ namespace Atom\Core\Console\Commands;
 use Atom\Core\Models\Badge;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
+
 use function Laravel\Prompts\progress;
 
 class BadgeSyncCommand extends Command
@@ -33,12 +34,14 @@ class BadgeSyncCommand extends Command
         // Validate file path in configuration
         if (! $filePath) {
             $this->error('The configuration for the external texts file is missing.');
+
             return 1;
         }
 
         // Attempt to read the file directly from the full path
         if (! file_exists($filePath)) {
             $this->error(sprintf('The external texts file does not exist at %s.', $filePath));
+
             return 1;
         }
 
@@ -47,6 +50,7 @@ class BadgeSyncCommand extends Command
         // Handle missing or empty file
         if (empty($file)) {
             $this->error(sprintf('The external texts file is empty or missing at %s.', $filePath));
+
             return 1;
         }
 
@@ -55,6 +59,7 @@ class BadgeSyncCommand extends Command
 
         if (json_last_error() !== JSON_ERROR_NONE) {
             $this->error(sprintf('Error decoding JSON: %s', json_last_error_msg()));
+
             return 1;
         }
 
@@ -65,6 +70,7 @@ class BadgeSyncCommand extends Command
         // Handle empty badge data
         if ($badges->isEmpty()) {
             $this->info('No badges to sync.');
+
             return 0;
         }
 
@@ -96,14 +102,16 @@ class BadgeSyncCommand extends Command
 
         if (empty($code) || empty($value)) {
             $this->error(sprintf('Invalid data for badge key "%s". Skipping...', $key));
+
             return false;
         }
 
         try {
             $filePath = sprintf('%s.gif', $code);
 
-            if (!file_exists($filePath)) {
+            if (! file_exists($filePath)) {
                 $this->warn(sprintf('Badge file "%s" does not exist. Skipping badge "%s".', $filePath, $code));
+
                 return false;
             }
 
@@ -120,6 +128,7 @@ class BadgeSyncCommand extends Command
         } catch (\Exception $e) {
             $this->error(sprintf('Error syncing badge "%s": %s', $code, $e->getMessage()));
             Log::error(sprintf('Error syncing badge "%s": %s', $code, $e->getMessage()));
+
             return false;
         }
     }
